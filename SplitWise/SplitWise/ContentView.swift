@@ -12,12 +12,15 @@ struct ContentView: View {
     @State private var checkAmount = 0.0
     @State private var numberOfPeople = 2
     
-    @State private var tipPercentages = [10, 20, 30, 40, 50]
+    @State private var tipPercentages = [0, 10, 20, 30, 40, 50]
     @State private var tipPercentage = 10
     
     @FocusState private var amountFocus: Bool
     
     @State private var showingAlert = false
+    
+    let currencyType = FloatingPointFormatStyle<Double>.Currency.currency(code: Locale.current.currency?.identifier ?? "USD")
+
     
     var tatalToPay: Double {
         let people = Double(numberOfPeople)
@@ -26,7 +29,7 @@ struct ContentView: View {
         let tipValue = checkAmount / 100 * tip
         let grandTotal = checkAmount + tipValue
         let amountPerPerson = grandTotal / people
-        return amountPerPerson.rounded(decimalPoint: 2)
+        return amountPerPerson
         
     }
     
@@ -34,8 +37,7 @@ struct ContentView: View {
         let tip = Double(tipPercentage)
         let tipValue = checkAmount / 100 * tip
         let grandTotal = checkAmount + tipValue
-        let rounded = grandTotal.rounded(decimalPoint: 2)
-        return rounded
+        return grandTotal
     }
     
     var body: some View {
@@ -55,7 +57,7 @@ struct ContentView: View {
                 }
                 
                 Section {
-                    Text("Amount: \(totalAmount)")
+                    Text(totalAmount, format: currencyType)
                 } header: {
                     Text("Total amount")
                 }
@@ -65,22 +67,20 @@ struct ContentView: View {
                         ForEach(tipPercentages, id: \.self) {
                             Text($0, format: .percent)
                         }
-                    }
+                    }.foregroundStyle(tipPercentage == 0 ? .red : .primary)
                 } header: {
-                    Text("Test")
+                    Text("Tip %")
                 }
                 
                 Section {
-                    Text("Total amount: \(tatalToPay)")
+                    Text(tatalToPay, format: currencyType)
                 } header: {
                     Text("Total amount to pay")
                 }
             }
             .navigationTitle("SplitWise")
             .toolbar {
-                
                 ToolbarItemGroup(placement: .keyboard) {
-                    Text("asdasd")
                     Spacer()
                     Button("Done") {
                         amountFocus = false
@@ -88,13 +88,6 @@ struct ContentView: View {
                 }
             }
         }
-    }
-}
-
-extension Double {
-    func rounded(decimalPoint: Int) -> Double {
-        let power = pow(10, Double(decimalPoint))
-       return (self * power).rounded() / power
     }
 }
 
